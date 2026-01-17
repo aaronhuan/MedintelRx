@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter //Lombok annotation to auto-generate getter methods for all fields
@@ -18,17 +18,23 @@ public class UserProfile {
 
     private String name;
 
-    private LocalDateTime createdAt;
+    private String timeZoneId;
+
+    private Instant createdAt;
     
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
     protected UserProfile(){} //JPA requires a default constructor for entity classes
 
     public UserProfile(String name) {
-        //Constructor to initialize UserProfile with a name
+        this(name, "UTC");
+    }
+
+    public UserProfile(String name, String timeZoneId) {
         this.name = name;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();   
+        this.timeZoneId = (timeZoneId == null || timeZoneId.isBlank()) ? "UTC" : timeZoneId;
+        this.createdAt = Instant.now();
+        this.updatedAt = Instant.now();   
     }
 
 }

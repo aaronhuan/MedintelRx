@@ -1,6 +1,6 @@
 package com.aaronhuang.medintel.domain.model;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 import jakarta.persistence.*;
@@ -24,7 +24,7 @@ public class CommonFood {
 
     private String displayName;
 
-    private LocalDateTime createdAt;
+    private Instant createdAt;
     
     protected CommonFood() {} //JPA default constructor
 
@@ -32,7 +32,7 @@ public class CommonFood {
         this.user = user;
         this.foodKey = foodKey;
         this.displayName = displayName;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = Instant.now();
     }
 
 }

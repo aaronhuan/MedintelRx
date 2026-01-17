@@ -1,6 +1,6 @@
 package com.aaronhuang.medintel.domain.model;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 import jakarta.persistence.*;
@@ -23,25 +23,25 @@ public class IntakeEvent {
     @JoinColumn(name = "medication_id", nullable = false)
     private Medication medication; //many intake events can belong to one medication
 
-    private LocalDateTime intakeTime;
+    private Instant intakeTime;
 
     private String dosage;
 
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     protected IntakeEvent() {} //JPA default constructor
 
     public IntakeEvent(
         UserProfile user,
         Medication medication,
-        LocalDateTime intakeTime,
+        Instant intakeTime,
         String dosage
     ) {
         this.user = user;
         this.medication = medication;
         this.intakeTime = intakeTime;
         this.dosage = dosage;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = Instant.now();
     }
 
 }

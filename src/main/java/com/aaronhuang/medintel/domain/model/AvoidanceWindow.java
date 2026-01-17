@@ -1,6 +1,6 @@
 package com.aaronhuang.medintel.domain.model;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 import com.aaronhuang.medintel.domain.model.enums.AvoidType;
@@ -27,8 +27,12 @@ public class AvoidanceWindow {
     @Enumerated(EnumType.STRING)
     private Severity severityLevel; //ENUM for severity level
 
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "intake_event_id", nullable = false)
+    private IntakeEvent intakeEvent;
+
+    private Instant startTime;
+    private Instant endTime;
     private String explanation;
     private String ruleId; //ID of the rule that triggered this avoidance window 
 
@@ -38,14 +42,16 @@ public class AvoidanceWindow {
         AvoidType type,
         String avoidTargetKey,
         Severity severityLevel,
-        LocalDateTime startTime,
-        LocalDateTime endTime,
+        IntakeEvent intakeEvent,
+        Instant startTime,
+        Instant endTime,
         String explanation,
         String ruleId
     ) {
         this.type = type;
         this.avoidTargetKey = avoidTargetKey;
         this.severityLevel = severityLevel;
+        this.intakeEvent = intakeEvent;
         this.startTime = startTime;
         this.endTime = endTime;
         this.explanation = explanation;

@@ -1,6 +1,6 @@
 package com.aaronhuang.medintel.domain.model;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 import jakarta.persistence.*;
@@ -20,13 +20,13 @@ public class Medication {
 
     private String normalizedName;
 
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     protected Medication() {} //JPA default constructor
 
     public Medication(String rxCui, String normalizedName) {
         this.rxCui = rxCui;
         this.normalizedName = normalizedName;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = Instant.now();
     }
 }
