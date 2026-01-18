@@ -5,6 +5,9 @@ import java.time.Duration;
 import com.aaronhuang.medintel.domain.model.enums.AvoidType;
 import com.aaronhuang.medintel.domain.model.enums.Severity;
 
+/**
+ * Immutable rule that defines an avoidance window triggered by a medication.
+ */
 public final class InteractionRule {
     private final String ruleId;
 
@@ -17,6 +20,17 @@ public final class InteractionRule {
 
     private final String explanationTemplate;
 
+    /**
+     * Creates a new interaction rule.
+     *
+     * @param ruleId unique rule identifier
+     * @param triggerMedicationKey RxCUI that triggers this rule
+     * @param avoidType category of item to avoid
+     * @param avoidTargetKey key of the item to avoid
+     * @param duration length of the avoidance window
+     * @param severity severity level of the interaction
+     * @param explanationTemplate template used for human-readable explanations
+     */
     public InteractionRule(
         String ruleId,
         String triggerMedicationKey,

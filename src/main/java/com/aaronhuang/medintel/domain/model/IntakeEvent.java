@@ -78,4 +78,21 @@ public class IntakeEvent {
         this.createdAt = Instant.now();
     }
 
+    /**
+     * Creates a non-persisted intake event for preview evaluation.
+     *
+     * @param user owning user profile
+     * @param medication medication to evaluate
+     * @param intakeTime proposed intake time, defaults to now when null
+     * @return simulated intake event (do not persist)
+     */
+    public static IntakeEvent simulated(
+        UserProfile user,
+        Medication medication,
+        Instant intakeTime
+    ) {
+        Instant effectiveTime = (intakeTime == null) ? Instant.now() : intakeTime;
+        return new IntakeEvent(user, medication, effectiveTime, null);
+    }
+
 }
