@@ -15,23 +15,40 @@ import com.aaronhuang.medintel.domain.model.enums.AvoidType;
 import com.aaronhuang.medintel.domain.model.enums.Severity;
 
 /**
- * Unit tests for InteractionEngineImpl.
- * 
- * @see InteractionEngineImpl  
+ * Unit tests for {@link InteractionEngineImpl} behavior.
+ *
+ * <p>These tests focus on deterministic outcomes for conflict detection and
+ * avoidance window generation without any Spring context.</p>
+ *
+ * @see InteractionEngineImpl
  */
 class InteractionEngineImplTest {
     // no external dependencies to mock in InteractionEngineImpl, only logic & models
 
     private final InteractionEngineImpl engine = new InteractionEngineImpl();
     
+    /**
+     * @return a basic user profile for tests
+     */
     private static UserProfile user(){
         return new UserProfile("test-user");
     }
 
+    /**
+     * @param rxCui canonical medication key
+     * @param name display name used in explanations
+     * @return a medication instance for tests
+     */
     private static Medication medication(String rxCui, String name){
         return new Medication(rxCui, name);
     }
 
+    /**
+     * @param user owning user profile
+     * @param medication medication taken
+     * @param intakeTime UTC intake time
+     * @return a concrete intake event for evaluation
+     */
     private static IntakeEvent intakeEvent(
         UserProfile user,
         Medication medication,
@@ -40,6 +57,13 @@ class InteractionEngineImplTest {
         return new IntakeEvent(user, medication, intakeTime, "10mg");
     }
 
+    /**
+     * @param start window start time
+     * @param end window end time
+     * @param avoidTargetKey target medication key to avoid
+     * @param intakeEvent triggering intake event
+     * @return a medication avoidance window for tests
+     */
     private static AvoidanceWindow window(
         Instant start,
         Instant end,
@@ -59,6 +83,10 @@ class InteractionEngineImplTest {
     }
 
     @Test
+    /**
+     * Verifies that no conflicts or windows are returned when there are
+     * no active windows and no rules.
+     */
     void evaluateNewIntake_emptyWindowAndNoRules_returnsEmptyResult() {
 
         // Arrange - instantiate necessary data
@@ -76,6 +104,10 @@ class InteractionEngineImplTest {
     }
 
     @Test
+    /**
+     * Verifies that an intake occurring within an active window with a matching
+     * medication key produces a conflict.
+     */
     void evaluateNewIntake_intakeDuringActiveWindow_detectsConflict() {
     
         UserProfile user = user();
@@ -100,6 +132,9 @@ class InteractionEngineImplTest {
     }
 
     @Test 
+    /**
+     * Verifies that an intake outside the active window does not produce a conflict.
+     */
     void evaluateNewIntake_intakeOutsideActiveWindow_noConflict() {
     
         UserProfile user = user();
@@ -120,6 +155,9 @@ class InteractionEngineImplTest {
     }
 
     @Test
+    /**
+     * Verifies that the engine returns no conflicts when there are no active windows.
+     */
     void evaluateNewIntake_noActiveWindows_returnsEmptyConflictList() {
         UserProfile user = user();
         Medication med = medication("1", "MedA");
@@ -136,6 +174,9 @@ class InteractionEngineImplTest {
     }
 
     @Test
+    /**
+     * Verifies that windows with non-matching medication keys do not create conflicts.
+     */
     void evaluateNewIntake_noMatchingWindows_returnsEmptyConflictList() {
         UserProfile user = user();
         Medication med = medication("1", "MedA");
@@ -159,6 +200,9 @@ class InteractionEngineImplTest {
     }
 
     @Test
+    /**
+     * Verifies that an intake at the start or end boundary is treated as a conflict.
+     */
     void evaluateNewIntake_intakeAtWindowBoundaries_detectsConflict() {
         UserProfile user = user();
         Medication med = medication("1", "MedA");
@@ -189,6 +233,10 @@ class InteractionEngineImplTest {
     }
 
     @Test
+    /**
+     * Verifies that a matching rule generates a new avoidance window with the
+     * expected fields populated.
+     */
     void evaluateNewIntake_ruleMatches_generatesAvoidanceWindow() {
         UserProfile user = user();
         Medication med = medication("1", "MedA");
@@ -225,6 +273,9 @@ class InteractionEngineImplTest {
     }
 
     @Test
+    /**
+     * Verifies that a non-matching rule does not generate any avoidance windows.
+     */
     void evaluateNewIntake_ruleDoesNotMatch_generatesNoWindows() {
         UserProfile user = user();
         Medication med = medication("1", "MedA");
@@ -248,5 +299,54 @@ class InteractionEngineImplTest {
         );
 
         assertTrue(result.getNewAvoidanceWindows().isEmpty(), "Expected no avoidance windows when rule does not match");
+    }
+
+    @Test
+    /**
+     * Verifies that a null rules list is handled safely and produces no windows.
+     */
+    void evaluateNewIntake_nullRules_returnsNoWindows() {
+        UserProfile user = user();
+        Medication med = medication("1", "MedA");
+        IntakeEvent intake = intakeEvent(user, med, Instant.parse("2026-01-01T10:00:00Z"));
+
+        InteractionResult result = engine.evaluateNewIntake(
+            user,
+            intake,
+            List.of(),
+            null
+        );
+
+        assertTrue(result.getNewAvoidanceWindows().isEmpty(), "Expected no avoidance windows when rules are null");
+    }
+
+    @Test
+    /**
+     * Verifies that non-medication avoidance windows are ignored by conflict detection.
+     */
+    void evaluateNewIntake_nonMedicationWindow_isIgnored() {
+        UserProfile user = user();
+        Medication med = medication("1", "MedA");
+        IntakeEvent intake = intakeEvent(user, med, Instant.parse("2026-01-01T10:00:00Z"));
+
+        AvoidanceWindow foodWindow = new AvoidanceWindow(
+            AvoidType.FOOD,
+            "1",
+            Severity.MINOR,
+            intake,
+            Instant.parse("2026-01-01T09:00:00Z"),
+            Instant.parse("2026-01-01T11:00:00Z"),
+            "Food window",
+            "rule-food"
+        );
+
+        InteractionResult result = engine.evaluateNewIntake(
+            user,
+            intake,
+            List.of(foodWindow),
+            List.of()
+        );
+
+        assertTrue(result.getConflicts().isEmpty(), "Expected no conflicts for non-medication window");
     }
 }
