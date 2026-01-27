@@ -108,6 +108,15 @@ public class AvoidanceWindow {
         this.ruleId = ruleId;
     }
 
+    /**
+     * Convenience accessor for the user profile that owns this window.
+     *
+     * @return owning user profile, or null when intake event is not set
+     */
+    public UserProfile getUserProfile() {
+        return intakeEvent == null ? null : intakeEvent.getUser();
+    }
+
 }
 
 
