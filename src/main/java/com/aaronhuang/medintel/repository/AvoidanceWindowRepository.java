@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import com.aaronhuang.medintel.domain.model.AvoidanceWindow;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -24,18 +25,25 @@ public interface AvoidanceWindowRepository extends JpaRepository<AvoidanceWindow
      *
      * <p>A window is active when {@code startTime <= timestamp <= endTime}.</p>
      *
-     * @param UserProfileId user identifier that owns the windows
+     * @param userId user identifier that owns the windows
      * @param timestamp UTC instant to check against the window bounds
      * @return active avoidance windows for the user at the given time
      */
     @Query("""
         SELECT aw FROM AvoidanceWindow aw
-        WHERE aw.userProfile.id = :userId
+        WHERE aw.intakeEvent.user.id = :userId
         AND aw.startTime <= :ts
         AND aw.endTime >= :ts
         """) 
     List <AvoidanceWindow> findActiveWindows( 
-        @Param("userId") UUID UserProfileId,
+        @Param("userId") UUID userId,
         @Param("ts") Instant timestamp
     );
+
+    @Modifying
+    @Query("""
+        DELETE FROM AvoidanceWindow aw
+        WHERE aw.endTime < :now
+        """)
+    void deleteExpiredWindows(@Param("now") Instant now);
 }
