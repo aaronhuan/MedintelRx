@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.aaronhuang.medintel.service.InteractionService;
 import com.aaronhuang.medintel.domain.interaction.IntakeEvaluationRequest;
 import com.aaronhuang.medintel.domain.interaction.InteractionResult;
-import com.aaronhuang.medintel.domain.model.Medication;
-import com.aaronhuang.medintel.repository.MedicationRepository;
+import com.aaronhuang.medintel.domain.model.UserMedication;
+import com.aaronhuang.medintel.repository.UserMedicationRepository;
 
 
 @RestController
@@ -20,28 +20,28 @@ import com.aaronhuang.medintel.repository.MedicationRepository;
 public class InteractionController {
     
     private final InteractionService interactionService;
-    private final MedicationRepository medicationRepository;
+    private final UserMedicationRepository userMedicationRepository;
 
-    public InteractionController(InteractionService interactionService, MedicationRepository medicationRepository) {
+    public InteractionController(InteractionService interactionService, UserMedicationRepository userMedicationRepository) {
         this.interactionService = interactionService;
-        this.medicationRepository = medicationRepository;
+        this.userMedicationRepository = userMedicationRepository;
     }
 
-    @PostMapping("/preview/{userId}/{medicationId}")
-    public InteractionResult previewInteraction(@PathVariable UUID userId, @PathVariable UUID medicationId) {
-        Medication medication = medicationRepository.findById(medicationId)
-            .orElseThrow(() -> new IllegalArgumentException("Medication not found"));
-        IntakeEvaluationRequest intakeRequest = new IntakeEvaluationRequest(medication, Instant.now());
+    @PostMapping("/preview/{userId}/{userMedicationId}")
+    public InteractionResult previewInteraction(@PathVariable UUID userId, @PathVariable UUID userMedicationId) {
+        UserMedication userMedication = userMedicationRepository.findById(userMedicationId)
+            .orElseThrow(() -> new IllegalArgumentException("User medication not found"));
+        IntakeEvaluationRequest intakeRequest = new IntakeEvaluationRequest(userMedication, Instant.now());
 
         return interactionService.previewIntake(userId, intakeRequest);
     }
 
-    @PostMapping("/intake/{userId}/{medicationId}")
-    public InteractionResult recordIntake(@PathVariable UUID userId, @PathVariable UUID medicationId) {
-        Medication medication = medicationRepository.findById(medicationId)
-            .orElseThrow(() -> new IllegalArgumentException("Medication not found"));
-        IntakeEvaluationRequest intakeRequest = new IntakeEvaluationRequest(medication, Instant.now());
+    @PostMapping("/intake/{userId}/{userMedicationId}")
+    public InteractionResult recordIntake(@PathVariable UUID userId, @PathVariable UUID userMedicationId) {
+        UserMedication userMedication = userMedicationRepository.findById(userMedicationId)
+            .orElseThrow(() -> new IllegalArgumentException("User medication not found"));
+        IntakeEvaluationRequest intakeRequest = new IntakeEvaluationRequest(userMedication, Instant.now());
 
-        return interactionService.recordIntake(userId, intakeRequest.getMedication(), intakeRequest.getProposedTime(), null);
+        return interactionService.recordIntake(userId, intakeRequest.getUserMedication(), intakeRequest.getProposedTime(), null);
     }
 }
