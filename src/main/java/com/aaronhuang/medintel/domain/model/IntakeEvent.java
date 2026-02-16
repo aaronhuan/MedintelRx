@@ -31,11 +31,11 @@ public class IntakeEvent {
     private UserProfile user; //many intake events can belong to one user
 
     /**
-     * Medication taken in this intake event.
+     * User medication taken in this intake event.
      */
     @ManyToOne (fetch = FetchType.LAZY)
-    @JoinColumn(name = "medication_id", nullable = false)
-    private Medication medication; //many intake events can belong to one medication
+    @JoinColumn(name = "user_medication_id", nullable = false)
+    private UserMedication userMedication; //many intake events can belong to one user medication
 
     /**
      * UTC instant when the intake occurred.
@@ -61,18 +61,18 @@ public class IntakeEvent {
      * Creates a new intake event.
      *
      * @param user owning user profile
-     * @param medication medication taken
+     * @param userMedication user medication taken
      * @param intakeTime UTC instant when the intake occurred
      * @param dosage free-text dosage description
      */
     public IntakeEvent(
         UserProfile user,
-        Medication medication,
+        UserMedication userMedication,
         Instant intakeTime,
         String dosage
     ) {
         this.user = user;
-        this.medication = medication;
+        this.userMedication = userMedication;
         this.intakeTime = intakeTime;
         this.dosage = dosage;
         this.createdAt = Instant.now();
@@ -82,17 +82,17 @@ public class IntakeEvent {
      * Creates a non-persisted intake event for preview evaluation.
      *
      * @param user owning user profile
-     * @param medication medication to evaluate
+     * @param userMedication user medication to evaluate
      * @param intakeTime proposed intake time, defaults to now when null
      * @return simulated intake event (do not persist)
      */
     public static IntakeEvent simulated(
         UserProfile user,
-        Medication medication,
+        UserMedication userMedication,
         Instant intakeTime
     ) {
         Instant effectiveTime = (intakeTime == null) ? Instant.now() : intakeTime;
-        return new IntakeEvent(user, medication, effectiveTime, null);
+        return new IntakeEvent(user, userMedication, effectiveTime, null);
     }
 
 }

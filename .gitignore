@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+### RxNav-in-a-Box ###
+medintel/rxnav-in-a-box-20260105/ 
+medintel/rxnav-in-a-box-*/

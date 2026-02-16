@@ -4,6 +4,7 @@ import com.aaronhuang.medintel.domain.model.Medication;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.UUID;
+import java.util.Optional;
 
 /**
  * Repository for normalized medication records used by the interaction engine.
@@ -19,5 +20,5 @@ public interface MedicationRepository extends JpaRepository<Medication, UUID> {
      * @param rxcui RxNorm concept identifier used as the canonical key
      * @return medication record that matches the RxCUI
      */
-    String findByRxCui(String rxcui);
+    Optional<Medication> findByRxCui(String rxcui);
 }

@@ -15,8 +15,8 @@ import com.aaronhuang.medintel.domain.interaction.InteractionResult;
 import com.aaronhuang.medintel.domain.interaction.InteractionRule;
 import com.aaronhuang.medintel.domain.model.AvoidanceWindow;
 import com.aaronhuang.medintel.domain.model.IntakeEvent;
-import com.aaronhuang.medintel.domain.model.Medication;
 import com.aaronhuang.medintel.domain.model.UserProfile;
+import com.aaronhuang.medintel.domain.model.UserMedication;
 
 /**
  * Service that coordinates interaction evaluation and persistence.
@@ -66,14 +66,19 @@ public class InteractionService {
         if (request == null) {
             throw new IllegalArgumentException("Request is required");
         }
-        if (request.getMedication() == null) {
-            throw new IllegalArgumentException("Medication is required");
+        if (request.getUserMedication() == null) {
+            throw new IllegalArgumentException("User medication is required");
         }
 
         UserProfile user = userProfileService.getById(userId);
+        UserMedication userMedication = request.getUserMedication();
+        if (userMedication.getUser() != null &&
+            !user.getId().equals(userMedication.getUser().getId())) {
+            throw new IllegalArgumentException("User medication does not belong to user: " + userId);
+        }
         IntakeEvent simulated = IntakeEvent.simulated(
             user,
-            request.getMedication(),
+            userMedication,
             request.getProposedTime()
         );
         return evaluateIntake(user, simulated);
@@ -83,7 +88,7 @@ public class InteractionService {
      * Records an intake event and persists any resulting avoidance windows.
      *
      * @param userId owning user profile identifier
-     * @param medication medication taken
+     * @param userMedication user medication taken
      * @param intakeTime time of intake (UTC)
      * @param dosage optional dosage description
      * @return interaction result, including persisted avoidance windows
@@ -91,22 +96,26 @@ public class InteractionService {
     @Transactional
     public InteractionResult recordIntake(
         UUID userId,
-        Medication medication,
+        UserMedication userMedication,
         Instant intakeTime,
         String dosage
     ) {
         if (userId == null) {
             throw new IllegalArgumentException("User id is required");
         }
-        if (medication == null) {
-            throw new IllegalArgumentException("Medication is required");
+        if (userMedication == null) {
+            throw new IllegalArgumentException("User medication is required");
         }
         if (intakeTime == null) {
             throw new IllegalArgumentException("Intake time is required");
         }
 
         UserProfile user = userProfileService.getById(userId);
-        IntakeEvent intakeEvent = new IntakeEvent(user, medication, intakeTime, dosage);
+        if (userMedication.getUser() != null &&
+            !user.getId().equals(userMedication.getUser().getId())) {
+            throw new IllegalArgumentException("User medication does not belong to user: " + userId);
+        }
+        IntakeEvent intakeEvent = new IntakeEvent(user, userMedication, intakeTime, dosage);
         return recordIntake(intakeEvent);
     }
 
@@ -124,8 +133,8 @@ public class InteractionService {
         if (intakeEvent.getUser() == null) {
             throw new IllegalArgumentException("Intake event must include a user");
         }
-        if (intakeEvent.getMedication() == null) {
-            throw new IllegalArgumentException("Intake event must include a medication");
+        if (intakeEvent.getUserMedication() == null) {
+            throw new IllegalArgumentException("Intake event must include a user medication");
         }
         if (intakeEvent.getIntakeTime() == null) {
             throw new IllegalArgumentException("Intake event must include an intake time");
@@ -154,7 +163,7 @@ public class InteractionService {
         );
 
         List<InteractionRule> rules = ruleService.findByTriggerMedication( //load relevant rules regarding the intake medication
-            intakeEvent.getMedication().getRxCui()
+            intakeEvent.getUserMedication().getMedication().getRxCui()
         );
 
         return interactionEngine.evaluateNewIntake(

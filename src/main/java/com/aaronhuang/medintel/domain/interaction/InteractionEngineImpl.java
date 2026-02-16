@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.aaronhuang.medintel.domain.model.AvoidanceWindow;
 import com.aaronhuang.medintel.domain.model.IntakeEvent;
+import com.aaronhuang.medintel.domain.model.Medication;
 import com.aaronhuang.medintel.domain.model.UserProfile;
 import com.aaronhuang.medintel.domain.model.enums.AvoidType;
 
@@ -50,7 +51,8 @@ public class InteractionEngineImpl implements InteractionEngine {
         // medication-vs-medication only (food support can be added later)
 
         List<DetectedConflict> conflicts = new ArrayList<>();
-        String intakeMedicationKey = intake.getMedication().getRxCui();
+        Medication intakeMedication = intake.getUserMedication().getMedication();
+        String intakeMedicationKey = intakeMedication.getRxCui();
         Instant intakeTime = intake.getIntakeTime();
 
         for (AvoidanceWindow window : activeWindows) {
@@ -60,7 +62,7 @@ public class InteractionEngineImpl implements InteractionEngine {
                     !intakeTime.isAfter(window.getEndTime())) {
                     String message = String.format(
                         "Medication %s was taken during an active avoidance window (%s -> %s).",
-                        intake.getMedication().getNormalizedName(),
+                        intakeMedication.getNormalizedName(),
                         window.getStartTime(),
                         window.getEndTime()
                     );
@@ -91,7 +93,8 @@ public class InteractionEngineImpl implements InteractionEngine {
             return List.of();
         }
 
-        String intakeMedicationKey = intake.getMedication().getRxCui();
+        Medication intakeMedication = intake.getUserMedication().getMedication();
+        String intakeMedicationKey = intakeMedication.getRxCui();
         Instant intakeTime = intake.getIntakeTime();
 
         List<AvoidanceWindow> windows = new ArrayList<>();
@@ -129,6 +132,6 @@ public class InteractionEngineImpl implements InteractionEngine {
         IntakeEvent intake
     ) {
         return rule.getExplanationTemplate()
-            .replace("{MEDICATION}", intake.getMedication().getNormalizedName());
+            .replace("{MEDICATION}", intake.getUserMedication().getMedication().getNormalizedName());
     }
 }

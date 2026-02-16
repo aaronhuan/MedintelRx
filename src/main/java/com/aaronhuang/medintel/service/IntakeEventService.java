@@ -60,4 +60,15 @@ public class IntakeEventService {
     public List<IntakeEvent> listAll() {
         return intakeEventRepository.findAll();
     }
+    
+    /**
+     * Fetches all intake events for a given user profile.
+     *
+     * @param userProfileId user profile id
+     * @return list of intake events for the user profile
+     */
+    @Transactional(readOnly = true)
+    public List<IntakeEvent> listAllByUserProfileId(UUID userProfileId) {
+        return intakeEventRepository.findByUser_Id(userProfileId);
+    }
 }
