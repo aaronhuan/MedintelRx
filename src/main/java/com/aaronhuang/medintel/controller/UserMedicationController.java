@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.aaronhuang.medintel.domain.model.UserMedication;
+import com.aaronhuang.medintel.domain.model.UserMedicationReminder;
+import com.aaronhuang.medintel.service.UserMedicationReminderService;
 import com.aaronhuang.medintel.service.UserMedicationService;
 
 import lombok.Getter;
@@ -26,9 +28,11 @@ import lombok.Setter;
 @RequestMapping("/api/user-medication")
 public class UserMedicationController {
     private final UserMedicationService userMedicationService;
+    private final UserMedicationReminderService reminderService;
 
-    public UserMedicationController(UserMedicationService userMedicationService) {
+    public UserMedicationController(UserMedicationService userMedicationService, UserMedicationReminderService reminderService) {
         this.userMedicationService = userMedicationService;
+        this.reminderService = reminderService;
     }
 
     @PostMapping
@@ -60,6 +64,17 @@ public class UserMedicationController {
     @GetMapping("/user/{userId}/active")
     public List<UserMedication> listActiveByUser(@PathVariable UUID userId) {
         return userMedicationService.listActiveByUser(userId);
+    }
+
+    @GetMapping("/{id}/reminders")
+    public List<UserMedicationReminder> listReminders(@PathVariable UUID id) {
+        return reminderService.listByUserMedication(id);
+    }
+
+    @PutMapping("/reminders/{reminderId}/intaked")
+    public UserMedicationReminder setIntaked(@PathVariable UUID reminderId, @RequestBody(required = false) IntakedRequest request) {
+        boolean intaked = request == null || request.getIntaked() == null || request.getIntaked();
+        return reminderService.setIntaked(reminderId, intaked);
     }
 
     @PutMapping("/{id}")
@@ -163,5 +178,17 @@ public class UserMedicationController {
          * Whether the medication is currently active.
          */
         private Boolean active;
+    }
+
+    /**
+     * Request body for marking a reminder as intaked.
+     */
+    @Getter
+    @Setter
+    public static class IntakedRequest {
+        /**
+         * Whether the reminder has been marked as taken.
+         */
+        private Boolean intaked;
     }
 }

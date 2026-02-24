@@ -1,6 +1,8 @@
 package com.aaronhuang.medintel.domain.model;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import jakarta.persistence.*;
@@ -33,6 +35,22 @@ public class Medication {
      * Normalized medication name for display and explanations.
      */
     private String normalizedName;
+
+    /**
+     * Normalized ingredient names (unique).
+     */
+    @ElementCollection
+    @CollectionTable(name = "medication_ingredients", joinColumns = @JoinColumn(name = "medication_id"))
+    @Column(name = "ingredient")
+    private Set<String> ingredients = new HashSet<>();
+
+    /**
+     * Brand names (unique).
+     */
+    @ElementCollection
+    @CollectionTable(name = "medication_brands", joinColumns = @JoinColumn(name = "medication_id"))
+    @Column(name = "brand_name")
+    private Set<String> brandNames = new HashSet<>();
 
     /**
      * UTC timestamp when the medication record was created.

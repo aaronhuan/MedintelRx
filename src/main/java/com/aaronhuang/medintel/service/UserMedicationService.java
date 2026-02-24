@@ -1,6 +1,7 @@
 package com.aaronhuang.medintel.service;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -202,12 +203,16 @@ public class UserMedicationService {
      */
     private Medication resolveMedication(String rxCui, String name) {
         String resolvedRxCui = rxCui;
-        if (resolvedRxCui == null || resolvedRxCui.isBlank()) {
+        if (resolvedRxCui == null || resolvedRxCui.isBlank()) { // RxCUI not provided
             if (name == null || name.isBlank()) {
                 throw new IllegalArgumentException("Medication name or RxCUI is required");
             }
-            List<String> candidates = rxNavClient.findRxCuisByName(name);
-            if (candidates.isEmpty()) {
+
+            List<String> suggestions = rxNavClient.getSpellingSuggestions(name);
+            String lookupName = (suggestions != null && !suggestions.isEmpty()) ? suggestions.get(0) : name;
+
+            List<String> candidates = rxNavClient.getRxCuisByName(lookupName);
+            if (candidates == null || candidates.isEmpty()) {
                 throw new IllegalArgumentException("No RxCUI found for name: " + name);
             }
             resolvedRxCui = candidates.get(0);
@@ -218,13 +223,35 @@ public class UserMedicationService {
             normalizedName = (name == null || name.isBlank()) ? resolvedRxCui : name;
         }
 
-        Medication medication = medicationRepository.findByRxCui(resolvedRxCui).orElse(null);
+        Medication medication = medicationRepository.findByRxCui(resolvedRxCui).orElse(null); //is it already in our database
         if (medication == null) {
-            medication = medicationRepository.save(new Medication(resolvedRxCui, normalizedName));
+            medication = medicationRepository.save(new Medication(resolvedRxCui, normalizedName)); //if not, create a new record with the resolved RxCUI and normalized name and save it to the database
         }
 
-        if (medication.getNormalizedName() == null || medication.getNormalizedName().isBlank()) {
+        boolean updated = false;
+
+        boolean needsIngredients = medication.getIngredients() == null || medication.getIngredients().isEmpty();
+        boolean needsBrands = medication.getBrandNames() == null || medication.getBrandNames().isEmpty();
+        if (needsIngredients || needsBrands) {
+            RxNavClient.IngredientBrandResult properties = rxNavClient.getPropertiesByRxCui(resolvedRxCui);
+            if (properties != null) {
+                if (needsIngredients && properties.ingredients() != null) {
+                    medication.setIngredients(new HashSet<>(properties.ingredients()));
+                    updated = true;
+                }
+                if (needsBrands && properties.brands() != null) {
+                    medication.setBrandNames(new HashSet<>(properties.brands()));
+                    updated = true;
+                }
+            }
+        }
+
+        if (medication.getNormalizedName() == null || medication.getNormalizedName().isBlank()) { //if the medication record exists but doesn't have a normalized name, update it with the resolved normalized name
             medication.setNormalizedName(normalizedName);
+            updated = true;
+        }
+
+        if (updated) {
             return medicationRepository.save(medication);
         }
 
