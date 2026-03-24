@@ -31,8 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
-
+.env
 
 ### RxNav-in-a-Box ###
-medintel/rxnav-in-a-box-20260105/ 
-medintel/rxnav-in-a-box-*/
+src/main/java/com/aaronhuang/medintel/rxnav-in-a-box/

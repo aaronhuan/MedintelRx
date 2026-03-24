@@ -3,6 +3,7 @@ package com.aaronhuang.medintel.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,9 +17,11 @@ import com.aaronhuang.medintel.repository.UserProfileRepository;
 public class UserProfileService {
 
     private final UserProfileRepository userProfileRepository;
-
-    public UserProfileService(UserProfileRepository userProfileRepository) {
+    private final PasswordEncoder passwordEncoder;
+    
+    public UserProfileService(UserProfileRepository userProfileRepository, PasswordEncoder passwordEncoder) {
         this.userProfileRepository = userProfileRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -32,6 +35,7 @@ public class UserProfileService {
         if (userProfile == null) {
             throw new IllegalArgumentException("User profile is required");
         }
+        userProfile.setPassword(passwordEncoder.encode(userProfile.getPassword())); // hash password before saving
         return userProfileRepository.save(userProfile);
     }
 

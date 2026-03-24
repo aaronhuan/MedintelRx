@@ -1,0 +1,52 @@
+{
+  "rules": [
+    {
+      "ruleId": "R-001",
+      "triggerType": "INGREDIENT",
+      "triggerKey": "warfarin",
+      "avoidType": "MEDICATION",
+      "avoidTargetKey": "ibuprofen",
+      "severity": "MAJOR",
+      "windowStartHours": 0,
+      "windowEndHours": 168,
+      "explanation": "Concurrent use increases bleeding risk due to additive anticoagulant/antiplatelet effects.",
+      "recommendedAction": "Avoid if possible; if used, monitor INR and bleeding."
+    },
+    {
+      "ruleId": "R-002",
+      "triggerType": "INGREDIENT",
+      "triggerKey": "lisinopril",
+      "avoidType": "MEDICATION",
+      "avoidTargetKey": "potassium chloride",
+      "severity": "MAJOR",
+      "windowStartHours": 0,
+      "windowEndHours": 336,
+      "explanation": "ACE inhibitors can increase potassium retention; combination may cause hyperkalemia.",
+      "recommendedAction": "Avoid routine combination; monitor potassium."
+    },
+    {
+      "ruleId": "R-003",
+      "triggerType": "INGREDIENT",
+      "triggerKey": "sertraline",
+      "avoidType": "MEDICATION",
+      "avoidTargetKey": "tramadol",
+      "severity": "MAJOR",
+      "windowStartHours": 0,
+      "windowEndHours": 120,
+      "explanation": "Both increase serotonergic activity, raising serotonin syndrome risk.",
+      "recommendedAction": "Avoid or monitor closely."
+    },
+    {
+      "ruleId": "R-004",
+      "triggerType": "INGREDIENT",
+      "triggerKey": "simvastatin",
+      "avoidType": "MEDICATION",
+      "avoidTargetKey": "clarithromycin",
+      "severity": "CONTRAINDICATED",
+      "windowStartHours": 0,
+      "windowEndHours": 240,
+      "explanation": "Clarithromycin inhibits CYP3A4, increasing simvastatin levels and myopathy risk.",
+      "recommendedAction": "Use alternative antibiotic or stop simvastatin temporarily."
+    }
+  ]
+}

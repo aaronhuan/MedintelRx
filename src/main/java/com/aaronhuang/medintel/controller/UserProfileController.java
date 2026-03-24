@@ -9,8 +9,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.security.core.Authentication;
+
+
 import com.aaronhuang.medintel.domain.model.UserProfile;
 import com.aaronhuang.medintel.service.UserProfileService;
+import jakarta.validation.Valid;
 
 
 @RestController
@@ -22,19 +26,10 @@ public class UserProfileController {
         this.userProfileService = userProfileService;
     }
 
-    @GetMapping("/{userId}")
-    public UserProfile getUserProfile(@PathVariable UUID userId) {
-        return userProfileService.getById(userId);
-    }
-
-    @PostMapping
-    public UserProfile createUserProfile(@RequestBody UserProfile userProfile) {
-        return userProfileService.create(userProfile);
-    }
-
-    @GetMapping("/all")
-    public Iterable<UserProfile> getAllUserProfiles() {
-        return userProfileService.listAll();
+    @GetMapping("/me")
+    public UserProfile getUserProfile(Authentication auth) {
+        String userId = auth.getName();
+        return userProfileService.getById(UUID.fromString(userId));
     }
     
 }

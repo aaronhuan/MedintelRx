@@ -15,7 +15,8 @@ public final class InteractionRule {
     private final AvoidType avoidType;
     private final String avoidTargetKey; // food or RxCUI
 
-    private final Duration duration;
+    private final Duration windowStart;
+    private final Duration windowEnd;
     private final Severity severity;
 
     private final String explanationTemplate;
@@ -27,7 +28,8 @@ public final class InteractionRule {
      * @param triggerMedicationKey RxCUI that triggers this rule
      * @param avoidType category of item to avoid
      * @param avoidTargetKey key of the item to avoid
-     * @param duration length of the avoidance window
+     * @param windowStart offset from intake time when the window begins
+     * @param windowEnd offset from intake time when the window ends
      * @param severity severity level of the interaction
      * @param explanationTemplate template used for human-readable explanations
      */
@@ -36,7 +38,8 @@ public final class InteractionRule {
         String triggerMedicationKey,
         AvoidType avoidType,
         String avoidTargetKey,
-        Duration duration,
+        Duration windowStart,
+        Duration windowEnd,
         Severity severity,
         String explanationTemplate
     ) {
@@ -44,7 +47,8 @@ public final class InteractionRule {
         this.triggerMedicationKey = triggerMedicationKey;
         this.avoidType = avoidType;
         this.avoidTargetKey = avoidTargetKey;
-        this.duration = duration;
+        this.windowStart = windowStart;
+        this.windowEnd = windowEnd;
         this.severity = severity;
         this.explanationTemplate = explanationTemplate;
     }
@@ -66,8 +70,12 @@ public final class InteractionRule {
         return avoidTargetKey;
     }
 
-    public Duration getDuration() {
-        return duration;
+    public Duration getWindowStart() {
+        return windowStart;
+    }
+
+    public Duration getWindowEnd() {
+        return windowEnd;
     }
 
     public Severity getSeverity() {
