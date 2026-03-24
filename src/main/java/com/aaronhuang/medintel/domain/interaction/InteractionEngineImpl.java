@@ -103,13 +103,14 @@ public class InteractionEngineImpl implements InteractionEngine {
                 continue;
             }
 
-            Instant endTime = intakeTime.plus(rule.getDuration());
+            Instant startTime = intakeTime.plus(rule.getWindowStart());
+            Instant endTime = intakeTime.plus(rule.getWindowEnd());
             AvoidanceWindow window = new AvoidanceWindow(
                 rule.getAvoidType(),
                 rule.getAvoidTargetKey(),
                 rule.getSeverity(),
                 intake,
-                intakeTime,
+                startTime,
                 endTime,
                 renderExplanation(rule, intake),
                 rule.getRuleId()
